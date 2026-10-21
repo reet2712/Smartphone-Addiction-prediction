@@ -83,64 +83,7 @@ Smartphone-Addiction-prediction/
 ├── smartphone_addiction_model_metadata.pkl            # Model metadata & evaluation criteria
 └── README.md                        # Documentation & deployment guide
 ```
-
----
-
-## 🚀 Quickstart & Local Installation
-
-### Prerequisites
-- Python **3.10+** (Recommended: Python **3.11**)
-- `git` version control
-
-### 1. Clone the Repository
-```bash
-git clone https://github.com/reet2712/Smartphone-Addiction-prediction.git
-cd Smartphone-Addiction-prediction
-```
-
-### 2. Create and Activate a Virtual Environment
-```bash
-# Windows
-python -m venv .venv
-.venv\Scripts\activate
-
-# macOS / Linux
-python3 -m venv .venv
-source .venv/bin/activate
-```
-
-### 3. Install Required Dependencies
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Launch the Streamlit Application
-```bash
-streamlit run streamlit_app.py
-```
 Open your browser at `http://localhost:8501` to interact with the application.
-
----
-
-## 🌐 1-Click Streamlit Community Cloud Deployment
-
-You can host this application online for free in under 2 minutes:
-
-1. **Push Code to GitHub**:
-   Ensure all files are committed and pushed to your GitHub repository:
-   `https://github.com/reet2712/Smartphone-Addiction-prediction`
-
-2. **Access Streamlit Cloud**:
-   Navigate to [share.streamlit.io](https://share.streamlit.io) and sign in with your GitHub account (`reet2712`).
-
-3. **Deploy New App**:
-   - Click **"New app"** (or **"Create app"**).
-   - In **Repository**, choose: `reet2712/Smartphone-Addiction-prediction`.
-   - In **Branch**, select: `main`.
-   - In **Main file path**, enter: `streamlit_app.py`.
-   - Click **Deploy!**
-
----
 
 ## 🔬 Model Performance & Feature Space
 
@@ -161,16 +104,6 @@ The predictive model assesses 12 input features:
 | `stress_level` | Self-reported stress indicator | Categorical | Low, Medium, High |
 | `academic_work_impact` | Work or study degradation | Categorical | Yes, No |
 
-### Model Benchmark Summary
-- **Random Forest Classifier**: Selected for highest Macro F1 and generalization capability across imbalanced classes (`Mild`, `Moderate`, `Severe`).
-- **Pipeline Integration**: Imputation, scaling, and one-hot encoding are bundled directly within the pipeline artifact to ensure 100% feature consistency at inference time.
-
----
-
-## 👤 Author & Acknowledgments
-
-- **Developer & Researcher**: [Reet Advani](https://github.com/reet2712)
+- 
+ [Reet Advani](https://github.com/reet2712)
 - **Repository**: [https://github.com/reet2712/Smartphone-Addiction-prediction](https://github.com/reet2712/Smartphone-Addiction-prediction)
-- **License**: MIT Open Source
-
----
