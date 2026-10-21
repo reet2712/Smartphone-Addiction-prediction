@@ -29,10 +29,8 @@ With modern smartphones serving as hubs for communication, entertainment, educat
 
 ### 🎯 1. Interactive Assessment & Real-Time Prediction
 - **Dynamic Persona Presets**: 1-click loading of archetypal usage personas (*Casual Social Scroller*, *Exam-Stressed Student*, *Hardcore Mobile Gamer*, *Balanced Minimalist*).
-- **Addiction Severity Gauge**: Semicircular indicator visually demarcating risk thresholds (Green / Amber / Red).
 - **Multi-Class Confidence Distribution**: Horizontal bar charts displaying model probability across all risk tiers (`Mild`, `Moderate`, `Severe`).
 - **Screen Time Donut Chart**: Proportional breakdown of Social Media, Mobile Gaming, Work/Study, and Other apps.
-- **Habit Benchmark Radar Chart**: Real-time multi-axial comparison of your metrics against population norms.
 - **Actionable Habit Insights**: Dynamic recommendations addressing sleep duration, notification management, and focus balance.
 
 ### 📊 2. Exploratory Data Analytics (EDA)
@@ -56,10 +54,9 @@ flowchart TD
     F --> G[Predicted Severity Tier<br/>Mild / Moderate / Severe]
     F --> H[Class Probabilities<br/>% Confidence]
     G & H --> I[Streamlit Interactive Dashboard]
-    I --> J[Plotly Severity Gauge]
-    I --> K[Activity Donut Chart]
-    I --> L[Cohort Radar Benchmark]
-    I --> M[Actionable Habit Insights]
+    I --> J[Activity Donut Chart]
+    I --> K[Model Confidence Probabilities]
+    I --> L[Actionable Habit Insights]
 ```
 
 ---

@@ -369,43 +369,34 @@ with tab_predict:
     </div>
     """, unsafe_allow_html=True)
     
-    row1_left, row1_right = st.columns([1, 1])
+    res_col1, res_col2 = st.columns(2)
     
-    with row1_left:
-        st.markdown("#### 🎛️ Addiction Severity Gauge")
-        if "Mild" in prob_dict and "Moderate" in prob_dict and "Severe" in prob_dict:
-            severity_score = (prob_dict["Mild"] * 15) + (prob_dict["Moderate"] * 55) + (prob_dict["Severe"] * 90)
-        else:
-            severity_score = 25 if prediction == "Mild" else (60 if prediction == "Moderate" else 90)
-            
-        fig_gauge = go.Figure(go.Indicator(
-            mode="gauge+number",
-            value=severity_score,
-            number={'suffix': "/100", 'font': {'size': 32, 'color': '#1E293B'}},
-            title={'text': "Composite Risk Index", 'font': {'size': 18, 'color': '#475569'}},
-            gauge={
-                'axis': {'range': [0, 100], 'tickwidth': 1, 'tickcolor': "#CBD5E1"},
-                'bar': {'color': "#1E1B4B", 'thickness': 0.28},
-                'bgcolor': "white",
-                'borderwidth': 2,
-                'bordercolor': "#E2E8F0",
-                'steps': [
-                    {'range': [0, 35], 'color': '#D1FAE5'},
-                    {'range': [35, 70], 'color': '#FEF3C7'},
-                    {'range': [70, 100], 'color': '#FEE2E2'}
-                ],
-                'threshold': {
-                    'line': {'color': "#DC2626", 'width': 4},
-                    'thickness': 0.75,
-                    'value': 70
-                }
-            }
-        ))
-        fig_gauge.update_layout(height=290, margin=dict(l=20, r=20, t=40, b=20), paper_bgcolor="rgba(0,0,0,0)")
-        st.plotly_chart(fig_gauge, use_container_width=True)
+    with res_col1:
+        st.markdown("#### 🍩 Screen Time Breakdown")
+        other_time = max(0.0, daily_screen_time - (social_media + gaming + work_study))
+        activity_df = pd.DataFrame({
+            "Activity": ["Social Media", "Gaming", "Work/Study", "Other Apps & Browsing"],
+            "Hours": [social_media, gaming, work_study, other_time]
+        })
+        fig_donut = px.pie(
+            activity_df,
+            names="Activity",
+            values="Hours",
+            hole=0.55,
+            color="Activity",
+            color_discrete_sequence=["#6366F1", "#EC4899", "#10B981", "#94A3B8"]
+        )
+        fig_donut.update_traces(textinfo="label+percent", hoverinfo="label+value+percent")
+        fig_donut.update_layout(
+            height=320,
+            showlegend=False,
+            margin=dict(l=10, r=10, t=10, b=10),
+            paper_bgcolor="rgba(0,0,0,0)"
+        )
+        st.plotly_chart(fig_donut, use_container_width=True)
         
-    with row1_right:
-        st.markdown("#### 📈 Class Probability Distribution")
+    with res_col2:
+        st.markdown("#### 📈 Model Prediction Probabilities")
         prob_df = pd.DataFrame({
             "Addiction Level": list(prob_dict.keys()),
             "Probability (%)": [v * 100 for v in prob_dict.values()]
@@ -422,7 +413,7 @@ with tab_predict:
         )
         fig_prob.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
         fig_prob.update_layout(
-            height=290,
+            height=320,
             xaxis=dict(range=[0, 115], title="Model Confidence (%)"),
             yaxis=dict(title=None, autorange="reversed"),
             showlegend=False,
@@ -432,78 +423,7 @@ with tab_predict:
         )
         st.plotly_chart(fig_prob, use_container_width=True)
 
-    row2_left, row2_right = st.columns([1, 1])
-    
-    with row2_left:
-        st.markdown("#### 🍩 Screen Time Distribution")
-        other_time = max(0.0, daily_screen_time - (social_media + gaming + work_study))
-        activity_df = pd.DataFrame({
-            "Activity": ["Social Media", "Gaming", "Work/Study", "Other Apps & Browsing"],
-            "Hours": [social_media, gaming, work_study, other_time]
-        })
-        fig_donut = px.pie(
-            activity_df,
-            names="Activity",
-            values="Hours",
-            hole=0.55,
-            color="Activity",
-            color_discrete_sequence=["#6366F1", "#EC4899", "#10B981", "#94A3B8"]
-        )
-        fig_donut.update_traces(textinfo="label+percent", hoverinfo="label+value+percent")
-        fig_donut.update_layout(
-            height=300,
-            showlegend=False,
-            margin=dict(l=10, r=10, t=10, b=10),
-            paper_bgcolor="rgba(0,0,0,0)"
-        )
-        st.plotly_chart(fig_donut, use_container_width=True)
-        
-    with row2_right:
-        st.markdown("#### 🕸️ Benchmark vs Dataset Population Average")
-        categories = ['Daily Screen (h)', 'Social Media (h)', 'Sleep Debt (10-h)', 'Notifications / 20', 'App Opens / 15']
-        user_metrics = [
-            daily_screen_time,
-            social_media,
-            max(0, 10 - sleep_hours),
-            notifications / 20.0,
-            app_opens / 15.0
-        ]
-        cohort_avg = [
-            7.50,
-            3.27,
-            max(0, 10 - 6.74),
-            134.26 / 20.0,
-            97.83 / 15.0
-        ]
-        
-        fig_radar = go.Figure()
-        fig_radar.add_trace(go.Scatterpolar(
-            r=user_metrics,
-            theta=categories,
-            fill='toself',
-            name='Your Profile',
-            line=dict(color='#4F46E5', width=2.5),
-            fillcolor='rgba(79, 70, 229, 0.25)'
-        ))
-        fig_radar.add_trace(go.Scatterpolar(
-            r=cohort_avg,
-            theta=categories,
-            fill='toself',
-            name='Cohort Average',
-            line=dict(color='#94A3B8', width=1.5, dash='dash'),
-            fillcolor='rgba(148, 163, 184, 0.15)'
-        ))
-        fig_radar.update_layout(
-            polar=dict(radialaxis=dict(visible=True, range=[0, 16])),
-            showlegend=True,
-            legend=dict(orientation="h", yanchor="bottom", y=-0.25, xanchor="center", x=0.5),
-            height=300,
-            margin=dict(l=30, r=30, t=10, b=35),
-            paper_bgcolor="rgba(0,0,0,0)"
-        )
-        st.plotly_chart(fig_radar, use_container_width=True)
-
-    st.markdown("### 💡 Tailored Behavioral & Wellness Plan")
+    st.markdown("### 💡 Usage Habit Insights & Recommendations")
     rec_cols = st.columns(3)
     
     with rec_cols[0]:
