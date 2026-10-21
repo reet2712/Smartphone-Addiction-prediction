@@ -1,8 +1,8 @@
 <div align="center">
 
-# 📱 Smartphone Addiction & Digital Wellness Intelligence
+# 📱 Smartphone Addiction Prediction
 
-### *Machine Learning Assessment of Digital Habits, Psychological Stress, and Usage Risk*
+### *Machine Learning Prediction of Digital Habits, Psychological Stress, and Addiction Risk*
 
 [![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.35+-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://streamlit.io)
@@ -14,40 +14,33 @@
 
 ---
 
-## 📌 Executive Summary
+## 📌 Project Overview
 
-With modern smartphones serving as hubs for communication, entertainment, education, and work, boundary dissolution often leads to compulsive screen usage and attention fragmentation. This project delivers an **end-to-end Machine Learning intelligence dashboard** designed to:
+With modern smartphones serving as hubs for communication, entertainment, education, and work, excessive usage often leads to compulsive screen behavior and attention fragmentation. This project delivers an **interactive Machine Learning prediction web application** designed to:
 
-1. **Quantify smartphone addiction severity** (`Mild`, `Moderate`, `Severe`) using a trained **Random Forest** classification pipeline.
-2. **Deconstruct daily screen usage** into discrete habit vectors (Social Media, Gaming, Productivity, Idle Browsing).
-3. **Benchmark individual metrics** against population distributions derived from an empirical cohort of **7,500 surveyed individuals**.
-4. **Deliver tailored behavioral wellness interventions** addressing sleep debt, notification overload, and stress-induced screen avoidance.
+1. **Predict smartphone addiction severity** (`Mild`, `Moderate`, `Severe`) using a trained **Random Forest** classification pipeline.
+2. **Analyze daily screen usage** across discrete habit categories (Social Media, Gaming, Work/Study, Idle Screen Time).
+3. **Benchmark individual metrics** against population distributions derived from an empirical dataset of **7,500 surveyed individuals**.
+4. **Provide personalized habit insights** regarding sleep debt, notification frequency, and screen balance.
 
 ---
 
 ## ✨ Key Features & Interactive Capabilities
 
-### 🎯 1. Interactive Assessment & Real-Time Scoring
+### 🎯 1. Interactive Assessment & Real-Time Prediction
 - **Dynamic Persona Presets**: 1-click loading of archetypal usage personas (*Casual Social Scroller*, *Exam-Stressed Student*, *Hardcore Mobile Gamer*, *Balanced Minimalist*).
 - **Addiction Severity Gauge**: Semicircular indicator visually demarcating risk thresholds (Green / Amber / Red).
-- **Multi-Class Confidence Distribution**: Horizontal bar charts displaying model probability across all risk tiers.
-- **Digital Habit Radar Chart**: Real-time multi-axial comparison of your metrics against population norms.
-- **Actionable Wellness Prescriptions**: Dynamic lifestyle adjustments triggered by specific elevated habits (e.g. blue-light curation, Pomodoro focus blocks, notification batching).
+- **Multi-Class Confidence Distribution**: Horizontal bar charts displaying model probability across all risk tiers (`Mild`, `Moderate`, `Severe`).
+- **Screen Time Donut Chart**: Proportional breakdown of Social Media, Mobile Gaming, Work/Study, and Other apps.
+- **Habit Benchmark Radar Chart**: Real-time multi-axial comparison of your metrics against population norms.
+- **Actionable Habit Insights**: Dynamic recommendations addressing sleep duration, notification management, and focus balance.
 
 ### 📊 2. Exploratory Data Analytics (EDA)
 - **Cohort Metrics**: Interactive metrics tracking median screen time, sleep duration, and severe addiction prevalence.
-- **Distribution Visualizations**: Box plots and scatter distributions demonstrating correlations between screen time, sleep deprivation, and addiction tiers.
+- **Distribution Visualizations**: Box plots and scatter distributions demonstrating correlations between screen time, sleep duration, and addiction tiers.
 - **Correlation Heatmap**: Multi-variable Pearson correlation matrix mapping interdependencies across digital behaviors.
 - **Cross-Tabulation**: Interactive examination of stress levels and academic/work impact across addiction classes.
-
-### 📁 3. Batch CSV Prediction Engine
-- Upload a batch CSV of multiple individuals or students to compute cohort-level predictions simultaneously.
-- Interactive pie chart summarizing risk breakdowns across cohorts.
-- 1-click instant export of processed results with assigned risk categories and model confidence scores.
-
-### 🧠 4. Model Architecture & Transparency
-- Complete documentation of data preprocessing pipelines (`StandardScaler`, `OneHotEncoder`, `SimpleImputer`).
-- Clear ethical and clinical disclaimers regarding behavioral machine learning applications.
+- **Raw Data Viewer**: Filterable preview of survey records from the 7,500-sample dataset.
 
 ---
 
@@ -66,10 +59,11 @@ flowchart TD
     I --> J[Plotly Severity Gauge]
     I --> K[Activity Donut Chart]
     I --> L[Cohort Radar Benchmark]
-    I --> M[Tailored Wellness Plan]
+    I --> M[Actionable Habit Insights]
 ```
 
 ---
+
 ## 📂 Project Repository Structure
 
 ```text
@@ -144,10 +138,7 @@ You can host this application online for free in under 2 minutes:
    - In **Repository**, choose: `reet2712/Smartphone-Addiction-prediction`.
    - In **Branch**, select: `main`.
    - In **Main file path**, enter: `streamlit_app.py`.
-   - In **App URL (optional)**: customize your subdomain (e.g., `smartphone-addiction-prediction.streamlit.app`).
-
-4. **Click Deploy!**:
-   Streamlit Cloud will automatically detect `requirements.txt`, install dependencies, load the serialized model artifacts, and provide a permanent public HTTPS link.
+   - Click **Deploy!**
 
 ---
 
@@ -171,17 +162,8 @@ The predictive model assesses 12 input features:
 | `academic_work_impact` | Work or study degradation | Categorical | Yes, No |
 
 ### Model Benchmark Summary
-- **Random Forest Classifier**: Selected for highest Macro F1 and generalization capability across imbalanced classes.
+- **Random Forest Classifier**: Selected for highest Macro F1 and generalization capability across imbalanced classes (`Mild`, `Moderate`, `Severe`).
 - **Pipeline Integration**: Imputation, scaling, and one-hot encoding are bundled directly within the pipeline artifact to ensure 100% feature consistency at inference time.
-
----
-
-## ⚠️ Ethical & Clinical Disclaimer
-
-> [!IMPORTANT]
-> This application is built as an educational and analytical research project evaluating self-reported behavioral survey data. "Smartphone Addiction" is not categorized as an official mental disorder in clinical diagnostic manuals such as the DSM-5. 
-> 
-> The risk classifications (`Mild`, `Moderate`, `Severe`) and wellness recommendations are generated for personal digital awareness and should **not** be considered a medical, psychological, or clinical diagnosis. Individuals experiencing severe distress or behavioral compulsions should consult qualified healthcare practitioners.
 
 ---
 

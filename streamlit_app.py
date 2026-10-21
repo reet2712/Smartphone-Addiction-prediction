@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 Smartphone Addiction Prediction - Interactive Streamlit Web Application
 Author: Reet Advani
@@ -195,13 +195,12 @@ with st.sidebar:
 # ---------------------------------------------------------
 st.markdown("""
 <div class="hero-banner">
-    <h1 class="hero-title">📱 Smartphone Addiction & Digital Wellness Intelligence</h1>
-    <p class="hero-subtitle">Machine Learning Assessment of Usage Habits, Psychological Stress, and Digital Dependency</p>
+    <h1 class="hero-title">📱 Smartphone Addiction Prediction</h1>
+    <p class="hero-subtitle">Machine Learning Prediction of Usage Habits, Device Activity, and Addiction Level</p>
     <div style="margin-top: 10px;">
-        <span class="badge-tag">🤖 Random Forest AI</span>
-        <span class="badge-tag">📊 7,500 Survey Cohort</span>
-        <span class="badge-tag">⚡ Real-Time Probability Scoring</span>
-        <span class="badge-tag">🌱 Behavioral Optimization</span>
+        <span class="badge-tag">🤖 Random Forest Model</span>
+        <span class="badge-tag">📊 7,500 Survey Dataset</span>
+        <span class="badge-tag">⚡ Real-Time Probability Prediction</span>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -213,11 +212,9 @@ if load_error:
 # ---------------------------------------------------------
 # Main Navigation Tabs
 # ---------------------------------------------------------
-tab_predict, tab_analytics, tab_batch, tab_about = st.tabs([
-    "🎯 Interactive Assessment",
-    "📊 Dataset Exploratory Analytics",
-    "📁 Batch CSV Prediction",
-    "🧠 Model Architecture & Methodology"
+tab_predict, tab_analytics = st.tabs([
+    "🎯 Predict Addiction Level",
+    "📊 Dataset Exploratory Analytics"
 ])
 
 # ---------------------------------------------------------
@@ -633,120 +630,3 @@ with tab_analytics:
             st.dataframe(dataset_df.head(100), use_container_width=True)
     else:
         st.info("Dataset file `Smartphone_Usage_And_Addiction_Analysis.csv` not found in root directory.")
-
-# ---------------------------------------------------------
-# TAB 3: Batch CSV Prediction
-# ---------------------------------------------------------
-with tab_batch:
-    st.markdown("### 📁 Batch Prediction Engine")
-    st.caption("Upload a `.csv` file containing multiple user records to predict addiction severity across cohorts simultaneously.")
-    
-    sample_template = pd.DataFrame([{
-        "age": 21,
-        "gender": "Female",
-        "daily_screen_time_hours": 7.5,
-        "social_media_hours": 3.8,
-        "gaming_hours": 1.2,
-        "work_study_hours": 2.5,
-        "sleep_hours": 6.5,
-        "notifications_per_day": 140,
-        "app_opens_per_day": 95,
-        "weekend_screen_time": 9.0,
-        "stress_level": "Medium",
-        "academic_work_impact": "Yes"
-    }, {
-        "age": 26,
-        "gender": "Male",
-        "daily_screen_time_hours": 4.0,
-        "social_media_hours": 1.5,
-        "gaming_hours": 0.5,
-        "work_study_hours": 2.0,
-        "sleep_hours": 7.5,
-        "notifications_per_day": 50,
-        "app_opens_per_day": 40,
-        "weekend_screen_time": 4.5,
-        "stress_level": "Low",
-        "academic_work_impact": "No"
-    }])
-    
-    st.download_button(
-        label="📥 Download CSV Input Template",
-        data=sample_template.to_csv(index=False),
-        file_name="smartphone_prediction_batch_template.csv",
-        mime="text/csv"
-    )
-    
-    uploaded_file = st.file_uploader("Upload CSV file for Batch Evaluation", type=["csv"])
-    
-    if uploaded_file is not None:
-        try:
-            batch_df = pd.read_csv(uploaded_file)
-            st.success(f"Uploaded successfully! Loaded {len(batch_df)} rows.")
-            
-            missing_cols = [c for c in feature_columns if c not in batch_df.columns]
-            if missing_cols:
-                st.error(f"Missing required columns: {', '.join(missing_cols)}")
-            else:
-                eval_features = batch_df[feature_columns].copy()
-                batch_preds = model.predict(eval_features)
-                batch_probs = model.predict_proba(eval_features)
-                
-                batch_df["Predicted_Addiction_Level"] = batch_preds
-                batch_df["Confidence_Score (%)"] = [round(float(max(p)) * 100, 2) for p in batch_probs]
-                
-                bcol1, bcol2 = st.columns([1, 2])
-                with bcol1:
-                    st.markdown("#### Prediction Summary")
-                    summary_counts = batch_df["Predicted_Addiction_Level"].value_counts().reset_index()
-                    summary_counts.columns = ["Level", "Count"]
-                    fig_batch = px.pie(
-                        summary_counts,
-                        names="Level",
-                        values="Count",
-                        hole=0.45,
-                        color="Level",
-                        color_discrete_map={"Mild": "#10B981", "Moderate": "#F59E0B", "Severe": "#EF4444"}
-                    )
-                    fig_batch.update_layout(height=260, margin=dict(l=10, r=10, t=10, b=10))
-                    st.plotly_chart(fig_batch, use_container_width=True)
-                    
-                with bcol2:
-                    st.markdown("#### Batch Results Preview")
-                    st.dataframe(batch_df.head(20), use_container_width=True)
-                    
-                st.download_button(
-                    label="📥 Download Processed Results (CSV)",
-                    data=batch_df.to_csv(index=False),
-                    file_name="batch_smartphone_addiction_results.csv",
-                    mime="text/csv",
-                    type="primary"
-                )
-        except Exception as e:
-            st.error(f"Error reading or processing CSV: {e}")
-
-# ---------------------------------------------------------
-# TAB 4: Model Architecture & Transparency
-# ---------------------------------------------------------
-with tab_about:
-    st.markdown("### 🧠 Model Architecture & Methodology")
-    
-    st.markdown("""
-    #### ⚙️ Pipeline Specifications
-    The predictive engine uses a composite machine learning pipeline trained with **scikit-learn 1.6.1**:
-    1. **Numeric Feature Preprocessing**:
-       - `SimpleImputer(strategy='median')` ensures resilience against missing or incomplete responses.
-       - `StandardScaler()` scales numerical features (`age`, `screen time`, `sleep`, `notifications`, etc.) to zero mean and unit variance.
-    2. **Categorical Feature Preprocessing**:
-       - `SimpleImputer(strategy='most_frequent')` for missing categorical indicators.
-       - `OneHotEncoder(handle_unknown='ignore')` transforms discrete variables (`gender`) into encoded vector representations.
-    3. **Classification Algorithm**:
-       - **Random Forest Classifier** with 300 estimators, balanced class weights, and bounded tree depth (`max_depth=12`) to prevent overfitting.
-       - Selected as top-performing model against Decision Trees and Logistic Regression using **Macro F1 Score** and **Stratified Test Accuracy**.
-    """)
-    
-    st.markdown("---")
-    st.markdown("""
-    #### ⚠️ Clinical & Ethical Disclaimer
-    - **Demonstration / Behavioral Classification**: This machine learning model evaluates self-reported digital usage patterns and behavioral survey data.
-    - **Not a Diagnostic Instrument**: Smartphone addiction is not an official standalone diagnosis in the DSM-5. This application provides risk categorization and behavioral insights for educational, academic, and self-awareness purposes. It does not replace professional clinical psychological evaluation.
-    """)
