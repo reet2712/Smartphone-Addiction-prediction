@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Smartphone Addiction Prediction - Interactive Streamlit Web Application
-Author: Reet Advani
-GitHub: https://github.com/reet2712/Smartphone-Addiction-prediction
+College SI Lab Machine Learning Project
 """
 
 import os
@@ -10,543 +9,342 @@ import pickle
 import pandas as pd
 import numpy as np
 import streamlit as st
-import plotly.graph_objects as go
-import plotly.express as px
 
 # ---------------------------------------------------------
 # Page Configuration
 # ---------------------------------------------------------
 st.set_page_config(
-    page_title="Smartphone Addiction Predictor",
+    page_title="Smartphone Addiction Prediction",
     page_icon="📱",
-    layout="wide",
-    initial_sidebar_state="expanded"
+    layout="centered",
+    initial_sidebar_state="collapsed"
 )
 
 # ---------------------------------------------------------
-# Custom Styling (CSS)
+# Custom Styling
 # ---------------------------------------------------------
 st.markdown("""
 <style>
-    /* Global styles */
     .main {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
-    
-    /* Header Gradient Banner */
-    .hero-banner {
-        background: linear-gradient(135deg, #1E1B4B 0%, #312E81 50%, #4338CA 100%);
-        padding: 2.2rem 2.5rem;
-        border-radius: 16px;
-        color: white;
-        margin-bottom: 2rem;
-        box-shadow: 0 10px 25px -5px rgba(67, 56, 202, 0.25);
+    .header-box {
+        text-align: center;
+        padding: 1.5rem 1rem 1rem 1rem;
+        margin-bottom: 1.5rem;
+        background-color: #f1f5f9;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
     }
-    .hero-title {
-        font-size: 2.3rem;
-        font-weight: 800;
+    .header-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #1e293b;
         margin: 0;
-        letter-spacing: -0.02em;
-        color: #FFFFFF !important;
     }
-    .hero-subtitle {
-        font-size: 1.1rem;
-        color: #C7D2FE !important;
+    .header-desc {
+        font-size: 1rem;
+        color: #64748b;
         margin-top: 0.5rem;
         margin-bottom: 0;
-        font-weight: 400;
     }
-    .badge-tag {
-        display: inline-block;
-        background: rgba(255, 255, 255, 0.15);
-        color: #FFFFFF;
-        padding: 4px 12px;
-        border-radius: 9999px;
-        font-size: 0.8rem;
-        font-weight: 600;
-        margin-top: 0.8rem;
-        margin-right: 0.5rem;
-        backdrop-filter: blur(4px);
-    }
-    
-    /* Result Badges */
-    .result-badge {
+    .result-card {
         padding: 1.5rem;
-        border-radius: 16px;
+        border-radius: 12px;
         text-align: center;
         color: white;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 10px 20px -3px rgba(0,0,0,0.15);
+        margin-top: 1.5rem;
+        margin-bottom: 1.25rem;
     }
-    .badge-mild {
-        background: linear-gradient(135deg, #059669 0%, #10B981 100%);
+    .card-mild {
+        background: linear-gradient(135deg, #059669 0%, #10b981 100%);
     }
-    .badge-moderate {
-        background: linear-gradient(135deg, #D97706 0%, #F59E0B 100%);
+    .card-moderate {
+        background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
     }
-    .badge-severe {
-        background: linear-gradient(135deg, #DC2626 0%, #EF4444 100%);
+    .card-severe {
+        background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
     }
-    
-    /* Metric pill */
-    .metric-pill {
-        background-color: #F8FAFC;
-        border-radius: 12px;
-        padding: 1.1rem 1.25rem;
-        border-left: 4px solid #4F46E5;
-        border-top: 1px solid #E2E8F0;
-        border-right: 1px solid #E2E8F0;
-        border-bottom: 1px solid #E2E8F0;
-        margin-bottom: 1rem;
-    }
-    .metric-pill-title {
-        font-size: 0.85rem;
-        color: #64748B;
+    .result-title {
+        font-size: 0.95rem;
+        letter-spacing: 0.08em;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
-        font-weight: 700;
+        opacity: 0.9;
+        font-weight: 600;
+    }
+    .result-class {
+        font-size: 2.4rem;
+        font-weight: 800;
+        margin: 0.3rem 0;
+    }
+    .result-explanation {
+        font-size: 1.05rem;
+        line-height: 1.5;
+        margin-top: 0.5rem;
+    }
+    .disclaimer-box {
+        margin-top: 2rem;
+        padding: 0.85rem 1rem;
+        background-color: #f8fafc;
+        border-left: 4px solid #94a3b8;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        color: #64748b;
     }
 </style>
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# Load Artifacts and Data
+# Load Model Artifacts Safely
 # ---------------------------------------------------------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+MODEL_FILE = os.path.join(BASE_DIR, "smartphone_addiction_best_model.pkl")
+FEATURES_FILE = os.path.join(BASE_DIR, "smartphone_addiction_feature_columns.pkl")
+CLASSES_FILE = os.path.join(BASE_DIR, "smartphone_addiction_target_classes.pkl")
+METADATA_FILE = os.path.join(BASE_DIR, "smartphone_addiction_model_metadata.pkl")
+
 @st.cache_resource(show_spinner="Loading machine learning model...")
-def load_model_artifacts():
+def load_artifacts():
+    missing = []
+    for filepath in [MODEL_FILE, FEATURES_FILE, CLASSES_FILE, METADATA_FILE]:
+        if not os.path.exists(filepath):
+            missing.append(os.path.basename(filepath))
+    
+    if missing:
+        return None, None, None, None, f"Missing required file(s): {', '.join(missing)}"
+    
     try:
-        with open(os.path.join(BASE_DIR, "smartphone_addiction_best_model.pkl"), "rb") as f:
+        with open(MODEL_FILE, "rb") as f:
             model = pickle.load(f)
-        with open(os.path.join(BASE_DIR, "smartphone_addiction_feature_columns.pkl"), "rb") as f:
+        with open(FEATURES_FILE, "rb") as f:
             features = pickle.load(f)
-        with open(os.path.join(BASE_DIR, "smartphone_addiction_target_classes.pkl"), "rb") as f:
+        with open(CLASSES_FILE, "rb") as f:
             classes = pickle.load(f)
-        with open(os.path.join(BASE_DIR, "smartphone_addiction_model_metadata.pkl"), "rb") as f:
+        with open(METADATA_FILE, "rb") as f:
             metadata = pickle.load(f)
         return model, features, classes, metadata, None
     except Exception as e:
-        return None, None, None, None, str(e)
+        return None, None, None, None, f"Failed to deserialize model artifacts: {str(e)}"
 
-@st.cache_data(show_spinner="Loading usage dataset...")
-def load_dataset():
-    csv_path = os.path.join(BASE_DIR, "Smartphone_Usage_And_Addiction_Analysis.csv")
-    if os.path.exists(csv_path):
-        return pd.read_csv(csv_path)
-    return None
-
-model, feature_columns, target_classes, model_metadata, load_error = load_model_artifacts()
-dataset_df = load_dataset()
+model, feature_columns, target_classes, model_metadata, load_error = load_artifacts()
 
 # ---------------------------------------------------------
-# Sidebar Configuration & User Presets
-# ---------------------------------------------------------
-with st.sidebar:
-    st.image("https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=600&q=80", use_container_width=True)
-    st.title("⚙️ Control Panel")
-    
-    st.markdown("### ⚡ Quick Presets")
-    st.caption("Select a representative user persona or calibrate custom values:")
-    
-    PRESETS = {
-        "Manual Input": None,
-        "Casual Social Scroller": {
-            "age": 22, "gender": "Female", "daily_screen": 6.5, "social_media": 4.0,
-            "gaming": 1.0, "work_study": 1.5, "sleep": 7.0, "notifications": 120,
-            "app_opens": 85, "weekend_screen": 8.0, "stress": "Medium", "impact": "No"
-        },
-        "Exam-Stressed Student": {
-            "age": 20, "gender": "Male", "daily_screen": 9.5, "social_media": 3.0,
-            "gaming": 1.0, "work_study": 5.5, "sleep": 5.0, "notifications": 150,
-            "app_opens": 110, "weekend_screen": 10.5, "stress": "High", "impact": "Yes"
-        },
-        "Hardcore Mobile Gamer": {
-            "age": 24, "gender": "Male", "daily_screen": 11.5, "social_media": 2.5,
-            "gaming": 5.0, "work_study": 2.0, "sleep": 4.5, "notifications": 210,
-            "app_opens": 140, "weekend_screen": 14.0, "stress": "High", "impact": "Yes"
-        },
-        "Balanced Digital Minimalist": {
-            "age": 28, "gender": "Other", "daily_screen": 3.5, "social_media": 1.0,
-            "gaming": 0.5, "work_study": 2.0, "sleep": 8.0, "notifications": 40,
-            "app_opens": 30, "weekend_screen": 4.0, "stress": "Low", "impact": "No"
-        }
-    }
-    
-    selected_preset = st.selectbox("Select Habit Persona", list(PRESETS.keys()), index=0)
-    preset_data = PRESETS[selected_preset]
-    
-    st.markdown("---")
-    st.markdown("### 📊 Model Info")
-    if model_metadata:
-        st.markdown(f"**Algorithm**: `{model_metadata.get('best_model_name', 'Random Forest')}`")
-        st.markdown(f"**Features Evaluated**: `{len(feature_columns)}`")
-        st.markdown(f"**Target Classes**: `{', '.join(target_classes)}`")
-    if dataset_df is not None:
-        st.markdown(f"**Training Cohort**: `{len(dataset_df):,} samples`")
-        
-    st.markdown("---")
-    st.markdown("### 🔗 Links")
-    st.markdown("[GitHub Repository](https://github.com/reet2712/Smartphone-Addiction-prediction)")
-    st.markdown("Developed by **Reet Advani**")
-
-# ---------------------------------------------------------
-# Top Hero Banner
+# Header Section
 # ---------------------------------------------------------
 st.markdown("""
-<div class="hero-banner">
-    <h1 class="hero-title">📱 Smartphone Addiction Prediction</h1>
-    <p class="hero-subtitle">Machine Learning Prediction of Usage Habits, Device Activity, and Addiction Level</p>
-    <div style="margin-top: 10px;">
-        <span class="badge-tag">🤖 Random Forest Model</span>
-        <span class="badge-tag">📊 7,500 Survey Dataset</span>
-        <span class="badge-tag">⚡ Real-Time Probability Prediction</span>
-    </div>
+<div class="header-box">
+    <h1 class="header-title">📱 Smartphone Addiction Prediction</h1>
+    <p class="header-desc">An educational machine learning tool that assesses smartphone usage habits and lifestyle factors to predict addiction risk levels (Mild, Moderate, or Severe).</p>
 </div>
 """, unsafe_allow_html=True)
 
 if load_error:
-    st.error(f"⚠️ Error loading model artifacts: {load_error}. Please ensure `.pkl` files exist in project root.")
+    st.error(f"⚠️ **Model Loading Error**: {load_error}")
+    st.info("Please ensure that all required `.pkl` model artifact files are present in the application directory.")
     st.stop()
 
 # ---------------------------------------------------------
-# Main Navigation Tabs
+# Input Form for Required 12 Features
 # ---------------------------------------------------------
-tab_predict, tab_analytics = st.tabs([
-    "🎯 Predict Addiction Level",
-    "📊 Dataset Exploratory Analytics"
-])
-
-# ---------------------------------------------------------
-# TAB 1: Interactive Assessment
-# ---------------------------------------------------------
-with tab_predict:
-    st.markdown("### 📋 Digital Habit Profile")
-    st.caption("Adjust your demographic, behavioral, and psychological parameters below to compute your predicted addiction risk score.")
+with st.form("prediction_form"):
+    st.subheader("Enter Usage & Lifestyle Details")
     
-    def val(key, default):
-        if preset_data and key in preset_data:
-            return preset_data[key]
-        return default
-
-    col1, col2, col3 = st.columns(3)
+    col1, col2 = st.columns(2)
     
     with col1:
-        st.markdown("#### 👤 Demographics & Total Time")
-        age = st.slider("Age (years)", min_value=16, max_value=80, value=int(val("age", 22)), step=1)
-        gender_options = ["Female", "Male", "Other"]
-        preset_gender = val("gender", "Female")
-        gender_default_idx = gender_options.index(preset_gender) if preset_gender in gender_options else 0
-        gender = st.selectbox("Gender", gender_options, index=gender_default_idx)
-        daily_screen_time = st.slider(
+        age = st.number_input(
+            "Age (years)",
+            min_value=10,
+            max_value=100,
+            value=22,
+            step=1,
+            help="Your age in years."
+        )
+        gender = st.selectbox(
+            "Gender",
+            options=["Female", "Male", "Other"],
+            index=0,
+            help="Select your gender (Female, Male, or Other as represented in dataset)."
+        )
+        daily_screen_time_hours = st.number_input(
             "Daily Screen Time (hours)",
-            min_value=1.0, max_value=18.0,
-            value=float(val("daily_screen", 6.5)), step=0.25,
-            help="Total hours spent actively using smartphone per weekday"
+            min_value=0.0,
+            max_value=24.0,
+            value=5.5,
+            step=0.25,
+            help="Total active smartphone screen hours on typical weekdays."
         )
-        weekend_screen_time = st.slider(
-            "Weekend Screen Time (hours)",
-            min_value=1.0, max_value=20.0,
-            value=float(val("weekend_screen", 8.0)), step=0.25,
-            help="Average daily hours on weekends"
+        social_media_hours = st.number_input(
+            "Social Media Usage (hours/day)",
+            min_value=0.0,
+            max_value=24.0,
+            value=2.5,
+            step=0.25,
+            help="Hours spent on platforms such as Instagram, TikTok, YouTube, X, etc."
         )
-        
+        gaming_hours = st.number_input(
+            "Gaming Usage (hours/day)",
+            min_value=0.0,
+            max_value=24.0,
+            value=1.0,
+            step=0.25,
+            help="Hours spent playing mobile games."
+        )
+        work_study_hours = st.number_input(
+            "Work / Study Usage (hours/day)",
+            min_value=0.0,
+            max_value=24.0,
+            value=2.0,
+            step=0.25,
+            help="Hours spent on academic lectures, study tools, or work productivity."
+        )
+
     with col2:
-        st.markdown("#### ⏱️ Activity Breakdown")
-        social_media = st.slider(
-            "Social Media (hours)",
-            min_value=0.0, max_value=12.0,
-            value=float(val("social_media", 3.5)), step=0.25,
-            help="Instagram, TikTok, YouTube Shorts, X, Snapchat, etc."
-        )
-        gaming = st.slider(
-            "Gaming (hours)",
-            min_value=0.0, max_value=10.0,
-            value=float(val("gaming", 1.0)), step=0.25,
-            help="Mobile gaming, competitive or casual"
-        )
-        work_study = st.slider(
-            "Work & Study (hours)",
-            min_value=0.0, max_value=12.0,
-            value=float(val("work_study", 2.0)), step=0.25,
-            help="Productive work, reading, emails, academic lectures"
-        )
-        
-        sum_activities = social_media + gaming + work_study
-        if sum_activities > daily_screen_time:
-            st.warning(f"⚠️ Activity breakdown ({sum_activities:.1f}h) exceeds reported Daily Screen Time ({daily_screen_time:.1f}h).")
-        else:
-            other_time = daily_screen_time - sum_activities
-            st.info(f"💡 Other Screen Time (Browsing/Utilities): **{other_time:.1f} hours**")
-
-    with col3:
-        st.markdown("#### 🧠 Device Habits & Well-Being")
-        sleep_hours = st.slider(
+        sleep_hours = st.number_input(
             "Nightly Sleep (hours)",
-            min_value=2.0, max_value=12.0,
-            value=float(val("sleep", 7.0)), step=0.25
+            min_value=0.0,
+            max_value=24.0,
+            value=7.0,
+            step=0.25,
+            help="Average sleep duration per night."
         )
-        notifications = st.number_input(
+        notifications_per_day = st.number_input(
             "Notifications per day",
-            min_value=10, max_value=800,
-            value=int(val("notifications", 120)), step=10,
-            help="Average alerts and push notifications received daily"
+            min_value=0,
+            max_value=1000,
+            value=120,
+            step=5,
+            help="Estimated daily notification count received."
         )
-        app_opens = st.number_input(
+        app_opens_per_day = st.number_input(
             "App Opens per day",
-            min_value=10, max_value=500,
-            value=int(val("app_opens", 80)), step=5,
-            help="How many times you pick up or unlock phone to check apps"
+            min_value=0,
+            max_value=1000,
+            value=75,
+            step=5,
+            help="Estimated number of times phone is unlocked or checked."
+        )
+        weekend_screen_time = st.number_input(
+            "Weekend Screen Time (hours/day)",
+            min_value=0.0,
+            max_value=24.0,
+            value=6.5,
+            step=0.25,
+            help="Average daily smartphone screen hours during weekends."
+        )
+        stress_level = st.selectbox(
+            "Stress Level",
+            options=["Low", "Medium", "High"],
+            index=1,
+            help="Perceived level of mental stress."
+        )
+        academic_work_impact = st.selectbox(
+            "Impact on Work / Studies",
+            options=["No", "Yes"],
+            index=0,
+            help="Whether smartphone usage negatively affects your work or academic performance."
         )
         
-        stress_options = ["Low", "Medium", "High"]
-        preset_stress = val("stress", "Medium")
-        stress_default_idx = stress_options.index(preset_stress) if preset_stress in stress_options else 1
-        stress_level = st.selectbox("Perceived Stress Level", stress_options, index=stress_default_idx)
-        
-        impact_options = ["No", "Yes"]
-        preset_impact = val("impact", "No")
-        impact_default_idx = impact_options.index(preset_impact) if preset_impact in impact_options else 0
-        academic_work_impact = st.selectbox(
-            "Negative Impact on Work/Studies?",
-            impact_options, index=impact_default_idx,
-            help="Has phone usage caused missed deadlines, distraction, or lower performance?"
+    submitted = st.form_submit_button("Predict Addiction Level", use_container_width=True, type="primary")
+
+# ---------------------------------------------------------
+# Prediction Execution & Rule Handling
+# ---------------------------------------------------------
+if submitted:
+    # 1. Feature sanity warning (non-blocking)
+    activity_sum = social_media_hours + gaming_hours + work_study_hours
+    if activity_sum > daily_screen_time_hours:
+        st.warning(
+            f"ℹ️ Note: The sum of Social Media, Gaming, and Work/Study ({activity_sum:.2f}h) "
+            f"exceeds total Daily Screen Time ({daily_screen_time_hours:.2f}h)."
         )
 
-    st.markdown("---")
-    
-    input_data = {
+    # 2. Build input DataFrame strictly following expected feature columns & ordering
+    input_dict = {
         "age": age,
         "gender": gender,
-        "daily_screen_time_hours": daily_screen_time,
-        "social_media_hours": social_media,
-        "gaming_hours": gaming,
-        "work_study_hours": work_study,
+        "daily_screen_time_hours": daily_screen_time_hours,
+        "social_media_hours": social_media_hours,
+        "gaming_hours": gaming_hours,
+        "work_study_hours": work_study_hours,
         "sleep_hours": sleep_hours,
-        "notifications_per_day": notifications,
-        "app_opens_per_day": app_opens,
+        "notifications_per_day": notifications_per_day,
+        "app_opens_per_day": app_opens_per_day,
         "weekend_screen_time": weekend_screen_time,
         "stress_level": stress_level,
         "academic_work_impact": academic_work_impact
     }
-    
-    input_df = pd.DataFrame([input_data]).reindex(columns=feature_columns)
-    
-    try:
-        prediction = model.predict(input_df)[0]
-        probabilities = model.predict_proba(input_df)[0]
-        prob_dict = dict(zip(model.classes_, probabilities))
-        max_prob = max(probabilities) * 100
-    except Exception as pred_err:
-        st.error(f"Prediction Error: {pred_err}")
-        st.stop()
-        
-    st.markdown("## 📊 Assessment Results")
-    
-    badge_class = {
-        "Mild": "badge-mild",
-        "Moderate": "badge-moderate",
-        "Severe": "badge-severe"
-    }.get(prediction, "badge-mild")
-    
-    icon_map = {"Mild": "🟢", "Moderate": "🟡", "Severe": "🔴"}
-    summary_map = {
-        "Mild": "Low Addiction Risk. Your smartphone interaction patterns demonstrate healthy boundaries, manageable screen time, and balanced sleep.",
-        "Moderate": "Moderate Addiction Risk. Smartphone habits are noticeable, with elevated screentime or notification frequency starting to encroach on rest and attention.",
-        "Severe": "Severe Addiction Risk. High screen exposure, frequent micro-checking, and sleep displacement indicate significant digital dependency."
+    input_df = pd.DataFrame([input_dict])[feature_columns]
+
+    # 3. Model inference vs explicit business rule handling
+    is_rule_applied = False
+    rule_note = None
+    prediction = None
+    prob_dict = None
+
+    # Application rule for out-of-distribution screen time
+    if daily_screen_time_hours >= 13.0:
+        is_rule_applied = True
+        prediction = "Severe"
+        rule_note = (
+            "⚠️ Application Rule Notice: Daily screen time is 13 hours or higher, which is outside the "
+            "training range of the original survey dataset (3.0 to 12.0 hours). By project-specific rule, "
+            "this usage is categorized as Severe. This is a heuristic business rule, not a learned statistical prediction."
+        )
+    else:
+        try:
+            raw_pred = model.predict(input_df)[0]
+            prediction = str(raw_pred)
+            if hasattr(model, "predict_proba"):
+                probs = model.predict_proba(input_df)[0]
+                prob_dict = {cls_name: float(p) for cls_name, p in zip(model.classes_, probs)}
+        except Exception as pred_err:
+            st.error(f"Prediction Error: {str(pred_err)}")
+            st.stop()
+
+    # 4. Result Card Presentation
+    card_class = {
+        "Mild": "card-mild",
+        "Moderate": "card-moderate",
+        "Severe": "card-severe"
+    }.get(prediction, "card-mild")
+
+    explanation_map = {
+        "Mild": "Low smartphone addiction risk. Device habits indicate balanced screen exposure with minimal disruption to sleep and daily activities.",
+        "Moderate": "Moderate smartphone addiction risk. Screen usage and notification checking are noticeable and may warrant mindful boundary-setting.",
+        "Severe": "Severe smartphone addiction risk. Usage patterns reflect intense screen exposure, frequent checking, or lifestyle displacement."
     }
-    
+
     st.markdown(f"""
-    <div class="result-badge {badge_class}">
-        <div style="font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.9;">Predicted Addiction Level</div>
-        <div style="font-size: 2.8rem; font-weight: 800; margin: 0.3rem 0;">{icon_map.get(prediction, '')} {prediction}</div>
-        <div style="font-size: 1.1rem; max-width: 700px; margin: 0 auto; line-height: 1.5;">
-            {summary_map.get(prediction, '')}
-        </div>
-        <div style="margin-top: 1rem; font-weight: 600; background: rgba(0,0,0,0.2); display: inline-block; padding: 6px 18px; border-radius: 20px;">
-            Model Confidence: {max_prob:.1f}%
-        </div>
+    <div class="result-card {card_class}">
+        <div class="result-title">Predicted Addiction Level</div>
+        <div class="result-class">{prediction}</div>
+        <div class="result-explanation">{explanation_map.get(prediction, '')}</div>
     </div>
     """, unsafe_allow_html=True)
-    
-    res_col1, res_col2 = st.columns(2)
-    
-    with res_col1:
-        st.markdown("#### 🍩 Screen Time Breakdown")
-        other_time = max(0.0, daily_screen_time - (social_media + gaming + work_study))
-        activity_df = pd.DataFrame({
-            "Activity": ["Social Media", "Gaming", "Work/Study", "Other Apps & Browsing"],
-            "Hours": [social_media, gaming, work_study, other_time]
-        })
-        fig_donut = px.pie(
-            activity_df,
-            names="Activity",
-            values="Hours",
-            hole=0.55,
-            color="Activity",
-            color_discrete_sequence=["#6366F1", "#EC4899", "#10B981", "#94A3B8"]
-        )
-        fig_donut.update_traces(textinfo="label+percent", hoverinfo="label+value+percent")
-        fig_donut.update_layout(
-            height=320,
-            showlegend=False,
-            margin=dict(l=10, r=10, t=10, b=10),
-            paper_bgcolor="rgba(0,0,0,0)"
-        )
-        st.plotly_chart(fig_donut, use_container_width=True)
-        
-    with res_col2:
-        st.markdown("#### 📈 Model Prediction Probabilities")
-        prob_df = pd.DataFrame({
-            "Addiction Level": list(prob_dict.keys()),
-            "Probability (%)": [v * 100 for v in prob_dict.values()]
-        })
-        color_map = {"Mild": "#10B981", "Moderate": "#F59E0B", "Severe": "#EF4444"}
-        fig_prob = px.bar(
-            prob_df,
-            x="Probability (%)",
-            y="Addiction Level",
-            orientation="h",
-            text="Probability (%)",
-            color="Addiction Level",
-            color_discrete_map=color_map
-        )
-        fig_prob.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
-        fig_prob.update_layout(
-            height=320,
-            xaxis=dict(range=[0, 115], title="Model Confidence (%)"),
-            yaxis=dict(title=None, autorange="reversed"),
-            showlegend=False,
-            margin=dict(l=20, r=20, t=20, b=20),
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)"
-        )
-        st.plotly_chart(fig_prob, use_container_width=True)
 
-    st.markdown("### 💡 Usage Habit Insights & Recommendations")
-    rec_cols = st.columns(3)
-    
-    with rec_cols[0]:
-        st.markdown("""
-        <div class="metric-pill">
-            <div class="metric-pill-title">🌙 Sleep & Circadian Hygiene</div>
-            <div style="margin-top: 8px; font-size: 0.95rem; color: #334155; line-height: 1.4;">
-        """, unsafe_allow_html=True)
-        if sleep_hours < 6.5:
-            st.markdown("⚠️ **Critical Sleep Deficit**: You are sleeping under 6.5 hours. Implement a strict **no-screen rule 45 minutes before bedtime** to allow melatonin secretion.")
-        else:
-            st.markdown("✅ **Sufficient Rest**: Your sleep schedule is protective against cognitive burnout. Keep bedtime consistent on weekends.")
-        st.markdown("</div></div>", unsafe_allow_html=True)
+    if is_rule_applied and rule_note:
+        st.warning(rule_note)
 
-    with rec_cols[1]:
-        st.markdown("""
-        <div class="metric-pill">
-            <div class="metric-pill-title">🔔 Notification Hygiene</div>
-            <div style="margin-top: 8px; font-size: 0.95rem; color: #334155; line-height: 1.4;">
-        """, unsafe_allow_html=True)
-        if notifications > 120 or app_opens > 90:
-            st.markdown(f"⚠️ **Attention Fragmentation**: With **{notifications} alerts** and **{app_opens} opens**, try batching non-urgent apps into scheduled morning and evening notification digests.")
-        else:
-            st.markdown("✅ **Healthy Boundaries**: Alert volume is within a controlled range, minimizing dopaminergic micro-checking.")
-        st.markdown("</div></div>", unsafe_allow_html=True)
+    # 5. Optional Probability Breakdown
+    if prob_dict is not None and not is_rule_applied:
+        st.markdown("### 📊 Model Prediction Probabilities")
+        prob_cols = st.columns(len(prob_dict))
+        for col, (cls_name, prob_val) in zip(prob_cols, prob_dict.items()):
+            col.metric(label=f"{cls_name}", value=f"{prob_val * 100:.1f}%")
 
-    with rec_cols[2]:
-        st.markdown("""
-        <div class="metric-pill">
-            <div class="metric-pill-title">🧠 Stress & Focus Mitigation</div>
-            <div style="margin-top: 8px; font-size: 0.95rem; color: #334155; line-height: 1.4;">
-        """, unsafe_allow_html=True)
-        if stress_level == "High" or academic_work_impact == "Yes":
-            st.markdown("⚠️ **Displaced Focus**: High stress and reported work/academic disruption indicate compulsive phone use as a coping escape. Use the **Pomodoro technique (25 min focus / 5 min walk)**.")
-        else:
-            st.markdown("✅ **Stable Digital Balance**: Phone usage is not interfering with daily commitments or escalating psychological tension.")
-        st.markdown("</div></div>", unsafe_allow_html=True)
+        # Clean native Streamlit progress bars
+        for cls_name, prob_val in prob_dict.items():
+            st.write(f"**{cls_name}**: {prob_val * 100:.1f}%")
+            st.progress(float(prob_val))
 
 # ---------------------------------------------------------
-# TAB 2: Dataset Exploratory Analytics
+# Educational Disclaimer
 # ---------------------------------------------------------
-with tab_analytics:
-    st.markdown("### 🔍 Exploratory Data Analysis (EDA)")
-    st.caption("Insights extracted from the 7,500 survey responses across demographic and digital behavior dimensions.")
-    
-    if dataset_df is not None:
-        kpi1, kpi2, kpi3, kpi4 = st.columns(4)
-        kpi1.metric("Total Cohort Size", f"{len(dataset_df):,} users")
-        kpi2.metric("Median Daily Screen Time", f"{dataset_df['daily_screen_time_hours'].median():.1f} hrs")
-        kpi3.metric("Avg Nightly Sleep", f"{dataset_df['sleep_hours'].mean():.1f} hrs")
-        severe_pct = (dataset_df['addiction_level'] == 'Severe').mean() * 100
-        kpi4.metric("Severe Addiction Cases", f"{severe_pct:.1f}%")
-        
-        st.markdown("---")
-        
-        eda_col1, eda_col2 = st.columns(2)
-        
-        with eda_col1:
-            st.markdown("#### Screen Time by Addiction Severity")
-            fig_box = px.box(
-                dataset_df,
-                x="addiction_level",
-                y="daily_screen_time_hours",
-                color="addiction_level",
-                category_orders={"addiction_level": ["None", "Mild", "Moderate", "Severe"]},
-                color_discrete_map={"None": "#94A3B8", "Mild": "#10B981", "Moderate": "#F59E0B", "Severe": "#EF4444"},
-                labels={"addiction_level": "Addiction Category", "daily_screen_time_hours": "Daily Screen Time (Hours)"}
-            )
-            fig_box.update_layout(height=350, showlegend=False, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
-            st.plotly_chart(fig_box, use_container_width=True)
-            
-        with eda_col2:
-            st.markdown("#### Sleep Duration vs Screen Time")
-            sample_sub = dataset_df.sample(min(1200, len(dataset_df)), random_state=42)
-            fig_scatter = px.scatter(
-                sample_sub,
-                x="daily_screen_time_hours",
-                y="sleep_hours",
-                color="addiction_level",
-                opacity=0.6,
-                category_orders={"addiction_level": ["None", "Mild", "Moderate", "Severe"]},
-                color_discrete_map={"None": "#94A3B8", "Mild": "#10B981", "Moderate": "#F59E0B", "Severe": "#EF4444"},
-                labels={"daily_screen_time_hours": "Daily Screen Time (h)", "sleep_hours": "Sleep (h)"}
-            )
-            fig_scatter.update_layout(height=350, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
-            st.plotly_chart(fig_scatter, use_container_width=True)
-            
-        st.markdown("---")
-        eda_col3, eda_col4 = st.columns(2)
-        
-        with eda_col3:
-            st.markdown("#### Correlation Heatmap (Digital Habits)")
-            numeric_cols = [
-                "age", "daily_screen_time_hours", "social_media_hours", "gaming_hours",
-                "work_study_hours", "sleep_hours", "notifications_per_day", "app_opens_per_day"
-            ]
-            corr_mat = dataset_df[numeric_cols].corr().round(2)
-            fig_heat = px.imshow(
-                corr_mat,
-                text_auto=True,
-                color_continuous_scale="Blues",
-                labels=dict(color="Correlation")
-            )
-            fig_heat.update_layout(height=380, margin=dict(l=10, r=10, t=10, b=10))
-            st.plotly_chart(fig_heat, use_container_width=True)
-            
-        with eda_col4:
-            st.markdown("#### Stress Level Breakdown by Addiction Category")
-            stress_ct = pd.crosstab(dataset_df['stress_level'], dataset_df['addiction_level'], normalize='index') * 100
-            stress_ct = stress_ct.reset_index().melt(id_vars='stress_level', var_name='Addiction Level', value_name='Percentage')
-            fig_bar = px.bar(
-                stress_ct,
-                x="stress_level",
-                y="Percentage",
-                color="Addiction Level",
-                barmode="group",
-                color_discrete_map={"None": "#94A3B8", "Mild": "#10B981", "Moderate": "#F59E0B", "Severe": "#EF4444"},
-                labels={"stress_level": "Reported Stress Level", "Percentage": "Cohort Proportion (%)"}
-            )
-            fig_bar.update_layout(height=380, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
-            st.plotly_chart(fig_bar, use_container_width=True)
-            
-        with st.expander("📋 View & Filter Raw Dataset (First 100 Records)"):
-            st.dataframe(dataset_df.head(100), use_container_width=True)
-    else:
-        st.info("Dataset file `Smartphone_Usage_And_Addiction_Analysis.csv` not found in root directory.")
+st.markdown("""
+<div class="disclaimer-box">
+    <strong>Educational Project Disclaimer:</strong> This application was developed as a college SI Lab Machine Learning classification project. 
+    Predictions are generated for educational and analytical demonstration purposes only. It is not a clinical diagnostic tool or medical evaluation.
+</div>
+""", unsafe_allow_html=True)

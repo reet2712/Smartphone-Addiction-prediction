@@ -1,4 +1,4 @@
-﻿# Byte-compiled / optimized / DLL files
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
@@ -19,5 +19,12 @@ desktop.ini
 .vscode/
 .idea/
 
-# Logs
+# Logs & temp files
 *.log
+evaluate_dataset.py
+test_model.py
+run_tests.py
+
+# Large datasets (excluded from production deployment repo)
+Smartphone_Usage_And_Addiction_Analysis.csv
+Smartphone_Usage_And_Addiction_Analysis(4).csv

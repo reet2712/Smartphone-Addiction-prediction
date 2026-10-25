@@ -1,173 +1,147 @@
-<div align="center">
+# Smartphone Addiction Prediction
 
-# 📱 Smartphone Addiction Prediction
-
-### *Machine Learning Prediction of Digital Habits, Psychological Stress, and Addiction Risk*
-
-[![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
-[![Streamlit](https://img.shields.io/badge/Streamlit-1.35+-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://streamlit.io)
-[![Scikit-Learn](https://img.shields.io/badge/scikit--learn-1.6.1-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white)](https://scikit-learn.org)
-[![Plotly](https://img.shields.io/badge/Plotly-Interactive%20Charts-3F4F75?style=for-the-badge&logo=plotly&logoColor=white)](https://plotly.com)
-[![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/reet2712/Smartphone-Addiction-prediction)
-
-</div>
+An educational Machine Learning project for predicting smartphone addiction risk tiers (**Mild**, **Moderate**, **Severe**) based on lifestyle, device interaction metrics, and psychological stress markers.
 
 ---
 
 ## 📌 Project Overview
 
-With modern smartphones serving as hubs for communication, entertainment, education, and work, excessive usage often leads to compulsive screen behavior and attention fragmentation. This project delivers an **interactive Machine Learning prediction web application** designed to:
+This project was built for the college SI Lab Machine Learning coursework. It trains and deploys a supervised classification model to evaluate digital wellness and device dependency patterns.
 
-1. **Predict smartphone addiction severity** (`Mild`, `Moderate`, `Severe`) using a trained **Random Forest** classification pipeline.
-2. **Analyze daily screen usage** across discrete habit categories (Social Media, Gaming, Work/Study, Idle Screen Time).
-3. **Benchmark individual metrics** against population distributions derived from an empirical dataset of **7,500 surveyed individuals**.
-4. **Provide personalized habit insights** regarding sleep debt, notification frequency, and screen balance.
-
----
-
-## ✨ Key Features & Interactive Capabilities
-
-### 🎯 1. Interactive Assessment & Real-Time Prediction
-- **Dynamic Persona Presets**: 1-click loading of archetypal usage personas (*Casual Social Scroller*, *Exam-Stressed Student*, *Hardcore Mobile Gamer*, *Balanced Minimalist*).
-- **Multi-Class Confidence Distribution**: Horizontal bar charts displaying model probability across all risk tiers (`Mild`, `Moderate`, `Severe`).
-- **Screen Time Donut Chart**: Proportional breakdown of Social Media, Mobile Gaming, Work/Study, and Other apps.
-- **Actionable Habit Insights**: Dynamic recommendations addressing sleep duration, notification management, and focus balance.
-
-### 📊 2. Exploratory Data Analytics (EDA)
-- **Cohort Metrics**: Interactive metrics tracking median screen time, sleep duration, and severe addiction prevalence.
-- **Distribution Visualizations**: Box plots and scatter distributions demonstrating correlations between screen time, sleep duration, and addiction tiers.
-- **Correlation Heatmap**: Multi-variable Pearson correlation matrix mapping interdependencies across digital behaviors.
-- **Cross-Tabulation**: Interactive examination of stress levels and academic/work impact across addiction classes.
-- **Raw Data Viewer**: Filterable preview of survey records from the 7,500-sample dataset.
+- **Target Classes**: `Mild`, `Moderate`, `Severe`
+- **Model Type**: scikit-learn `Pipeline` (ColumnTransformer with imputation, scaling, one-hot encoding, and a `RandomForestClassifier`)
+- **Dataset**: 7,500 survey responses (`Smartphone_Usage_And_Addiction_Analysis.csv`)
+- **Key Features**: 12 behavioral and demographic attributes
+- **Web Interface**: Lightweight, responsive Streamlit application
 
 ---
 
-## 🏗️ Architecture & Pipeline Flow
-
-```mermaid
-flowchart TD
-    A[User Digital Inputs<br/>Screen Time, Social, Gaming, Sleep, Stress] --> B[Feature Pipeline]
-    B --> C[SimpleImputer<br/>Missing Value Handling]
-    C --> D[StandardScaler & OneHotEncoder]
-    D --> E[Random Forest Classifier<br/>300 Trees, Balanced Class Weights]
-    E --> F[Inference Engine]
-    F --> G[Predicted Severity Tier<br/>Mild / Moderate / Severe]
-    F --> H[Class Probabilities<br/>% Confidence]
-    G & H --> I[Streamlit Interactive Dashboard]
-    I --> J[Activity Donut Chart]
-    I --> K[Model Confidence Probabilities]
-    I --> L[Actionable Habit Insights]
-```
-
----
-
-## 📂 Project Repository Structure
+## 📂 Repository File Structure
 
 ```text
 Smartphone-Addiction-prediction/
 ├── .streamlit/
-│   └── config.toml                  # Streamlit visual theme & server parameters
-├── .gitignore                       # Git ignored files & environments
-├── requirements.txt                 # Exact dependencies for cloud deployment
-├── streamlit_app.py                 # Interactive Streamlit Web Application
-├── app.py                           # Application entrypoint wrapper
-├── main.py                          # Legacy Flask prototype
-├── Smartphone_Usage_And_Addiction_Analysis.csv        # 7,500-sample dataset
-├── Smartphone_Usage_Classification_and_PKL_Download.ipynb # Model training & EDA notebook
-├── smartphone_addiction_best_model.pkl                # Trained Random Forest pipeline
-├── smartphone_addiction_feature_columns.pkl           # Feature schema order
-├── smartphone_addiction_target_classes.pkl            # Target class labels
-├── smartphone_addiction_model_metadata.pkl            # Model metadata & evaluation criteria
-└── README.md                        # Documentation & deployment guide
+│   └── config.toml                              # Streamlit theme & server configuration
+├── .gitignore                                   # Ignore list for logs, environments, cache
+├── app.py                                       # Main Streamlit web application entrypoint
+├── streamlit_app.py                             # Mirror/canonical Streamlit script
+├── main.py                                      # Legacy local Flask prototype (kept for reference)
+├── Smartphone_Usage_Classification_and_PKL_Download.ipynb # Model training & experimentation notebook
+├── smartphone_addiction_best_model.pkl          # Trained scikit-learn Random Forest Pipeline
+├── smartphone_addiction_feature_columns.pkl     # Feature names in expected order (12 columns)
+├── smartphone_addiction_target_classes.pkl      # Target class labels ['Mild', 'Moderate', 'Severe']
+├── smartphone_addiction_model_metadata.pkl      # Pipeline configuration and metadata
+├── render.yaml                                  # Render deployment blueprint specification
+├── requirements.txt                             # Production dependencies
+└── README.md                                    # Project documentation and deployment guide
 ```
 
 ---
 
-## 🚀 Quickstart & Local Installation
+## ⚙️ Model Input Features
 
-### Prerequisites
-- Python **3.10+** (Recommended: Python **3.11**)
-- `git` version control
+The model requires 12 features in the exact following schema:
 
-### 1. Clone the Repository
-```bash
-git clone https://github.com/reet2712/Smartphone-Addiction-prediction.git
-cd Smartphone-Addiction-prediction
-```
+| Feature Name | Type | UI Input / Range | Description |
+| :--- | :--- | :--- | :--- |
+| `age` | Integer | 10 – 100 | Age of user in years |
+| `gender` | Categorical | Female, Male, Other | Gender identity |
+| `daily_screen_time_hours` | Float | 0.0 – 24.0 | Total weekday screen hours |
+| `social_media_hours` | Float | 0.0 – 24.0 | Screen time on social networks |
+| `gaming_hours` | Float | 0.0 – 24.0 | Time spent playing mobile games |
+| `work_study_hours` | Float | 0.0 – 24.0 | Productive device hours |
+| `sleep_hours` | Float | 0.0 – 24.0 | Nightly sleep duration |
+| `notifications_per_day` | Integer | 0 – 1000 | Number of notifications received |
+| `app_opens_per_day` | Integer | 0 – 1000 | Number of times phone is unlocked |
+| `weekend_screen_time` | Float | 0.0 – 24.0 | Daily screen hours on weekends |
+| `stress_level` | Categorical | Low, Medium, High | Perceived mental stress |
+| `academic_work_impact` | Categorical | No, Yes | Perceived negative impact on studies/work |
 
-### 2. Create and Activate a Virtual Environment
-```bash
-# Windows
-python -m venv .venv
-.venv\Scripts\activate
+*Note: `transaction_id`, `user_id`, and `addicted_label` are excluded from model inputs to prevent data leakage.*
 
-# macOS / Linux
-python3 -m venv .venv
-source .venv/bin/activate
-```
+---
 
-### 3. Install Required Dependencies
+## 🔬 High Screen-Time Prediction Rule (13+ Hours)
+
+- **Dataset Training Range**: The empirical dataset's maximum `daily_screen_time_hours` is **12.0 hours**.
+- **Out-of-Distribution Behavior**: Screen times $\ge$ 13 hours are outside the training distribution, where decision trees cannot extrapolate beyond their observed split thresholds.
+- **Application Business Rule**: For educational demonstration, if `daily_screen_time_hours` $\ge 13.0$, the application returns **Severe** via an explicit, transparent rule and displays an informative banner informing the user that the input exceeds the training distribution.
+- **In-Range Behavior**: Inputs with daily screen time $< 13.0$ hours are evaluated directly by the trained `RandomForestClassifier` pipeline.
+
+---
+
+## 💻 Local Setup & Running in PyCharm
+
+### 1. Open Project in PyCharm
+1. Open PyCharm and select **Open** -> choose this project directory.
+2. Configure a Python 3.10 or 3.11 interpreter:
+   - Go to **File** -> **Settings** -> **Project: new_project** -> **Python Interpreter**.
+   - Select **Add Interpreter** -> **New Virtual Environment** (Virtualenv).
+   - Ensure the Base Python is **Python 3.10** or **Python 3.11**.
+
+### 2. Install Dependencies
+Open the PyCharm **Terminal** window (Alt + F12) and run:
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Launch the Streamlit Application
+### 3. Run the Streamlit Application
+In the PyCharm Terminal:
 ```bash
-streamlit run streamlit_app.py
+streamlit run app.py
 ```
-Open your browser at `http://localhost:8501` to interact with the application.
+Streamlit will launch locally and display the URL:
+```text
+Local URL: http://localhost:8501
+Network URL: http://<your-ip>:8501
+```
 
 ---
 
-## 🌐 1-Click Streamlit Community Cloud Deployment
+## 🚀 Cloud Deployment Guide
 
-You can host this application online for free in under 2 minutes:
+### Option A: Streamlit Community Cloud (Recommended - Free & Instant)
+1. Push your repository to GitHub (see GitHub steps below).
+2. Go to [share.streamlit.io](https://share.streamlit.io/) and log in with GitHub.
+3. Click **New app**.
+4. Select your repository: `Smartphone-Addiction-prediction`.
+5. Select branch: `main`.
+6. Set **Main file path**: `app.py`.
+7. Click **Deploy!**.
 
-1. **Push Code to GitHub**:
-   Ensure all files are committed and pushed to your GitHub repository:
-   `https://github.com/reet2712/Smartphone-Addiction-prediction`
+### Option B: Render (Web Service)
+1. Go to [render.com](https://render.com) and log in.
+2. Click **New +** -> **Web Service**.
+3. Connect your GitHub repository.
+4. Select the following settings:
+   - **Environment**: `Python 3`
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `streamlit run app.py --server.port $PORT --server.address 0.0.0.0`
+5. Click **Create Web Service**.
 
-2. **Access Streamlit Cloud**:
-   Navigate to [share.streamlit.io](https://share.streamlit.io) and sign in with your GitHub account (`reet2712`).
-
-3. **Deploy New App**:
-   - Click **"New app"** (or **"Create app"**).
-   - In **Repository**, choose: `reet2712/Smartphone-Addiction-prediction`.
-   - In **Branch**, select: `main`.
-   - In **Main file path**, enter: `streamlit_app.py`.
-   - Click **Deploy!**
-
----
-
-## 🔬 Model Performance & Feature Space
-
-The predictive model assesses 12 input features:
-
-| Feature Name | Description | Type | Range / Domain |
-|:---|:---|:---|:---|
-| `age` | User chronological age | Numeric | 16 – 80 |
-| `gender` | Identified gender category | Categorical | Female, Male, Other |
-| `daily_screen_time_hours` | Active weekday screen hours | Numeric | 1.0 – 18.0 |
-| `social_media_hours` | Hours on social & short-video apps | Numeric | 0.0 – 12.0 |
-| `gaming_hours` | Mobile gaming engagement | Numeric | 0.0 – 10.0 |
-| `work_study_hours` | Productive academic/work use | Numeric | 0.0 – 12.0 |
-| `sleep_hours` | Average nightly sleep | Numeric | 2.0 – 12.0 |
-| `notifications_per_day` | Total daily push notifications | Numeric | 10 – 800 |
-| `app_opens_per_day` | Phone pick-ups & unlocks per day | Numeric | 10 – 500 |
-| `weekend_screen_time` | Average daily weekend screen hours | Numeric | 1.0 – 20.0 |
-| `stress_level` | Self-reported stress indicator | Categorical | Low, Medium, High |
-| `academic_work_impact` | Work or study degradation | Categorical | Yes, No |
-
-### Model Benchmark Summary
-- **Random Forest Classifier**: Selected for highest Macro F1 and generalization capability across imbalanced classes (`Mild`, `Moderate`, `Severe`).
-- **Pipeline Integration**: Imputation, scaling, and one-hot encoding are bundled directly within the pipeline artifact to ensure 100% feature consistency at inference time.
+*(Alternatively, connect via `render.yaml` blueprint included in the root directory).*
 
 ---
 
-## 👤 Author & Acknowledgments
+## 🐙 GitHub Steps to Update Repository
 
-- **Developer & Researcher**: [Reet Advani](https://github.com/reet2712)
-- **Repository**: [https://github.com/reet2712/Smartphone-Addiction-prediction](https://github.com/reet2712/Smartphone-Addiction-prediction)
-- **License**: MIT Open Source
+To update your remote GitHub repository:
+
+```bash
+# 1. Check changed files
+git status
+
+# 2. Stage changes
+git add app.py streamlit_app.py requirements.txt render.yaml README.md .gitignore
+
+# 3. Commit changes
+git commit -m "fix: implement high screen-time rule, simplify UI for deployment, and add Render configuration"
+
+# 4. Push to GitHub
+git push origin main
+```
 
 ---
+
+## 🛡️ Disclaimer
+This project is created strictly for academic and educational demonstration within the college SI Lab. It is not a medical diagnostic tool or psychological instrument.
